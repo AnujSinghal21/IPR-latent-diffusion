@@ -18,3 +18,6 @@ Execute the cells in `run.ipynb`.
     
 I have already written the arguments that needs to be passed to each file already in the run.py file that will automatically run the code for ROCStories dataset.
 
+## Acknowledgment
+
+https://github.com/justinlovelace/latent-diffusion-for-language
