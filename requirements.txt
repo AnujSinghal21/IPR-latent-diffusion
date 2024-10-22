@@ -1,0 +1,16 @@
+accelerate
+datasets
+einops
+ema_pytorch
+evaluate
+nltk
+numpy
+Pillow
+scikit_learn
+sentence_transformers
+spacy
+torch
+torchvision
+tqdm
+transformers
+wandb
