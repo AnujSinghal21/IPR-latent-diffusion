@@ -161,6 +161,27 @@ class AbsolutePositionalEmbedding(nn.Module):
         pos_emb = pos_emb * self.scale
         return l2norm(pos_emb) if self.l2norm_embed else pos_emb
 
+class DynamicPositionalEmbedding(nn.Module):
+    def __init__(self, dim, l2norm_embed=False):
+        super().__init__()
+        self.dim = dim
+        self.scale = dim ** -0.5 if not l2norm_embed else 1.
+        self.l2norm_embed = l2norm_embed
+
+    def forward(self, x):
+        seq_len = x.size(1)
+        pos = torch.arange(seq_len, dtype=torch.float32, device=x.device).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, self.dim, 2, device=x.device) * -(math.log(10000.0) / self.dim))
+        
+        pos_emb = torch.zeros((seq_len, self.dim), device=x.device)
+        pos_emb[:, 0::2] = torch.sin(pos * div_term)
+        pos_emb[:, 1::2] = torch.cos(pos * div_term)
+        
+        pos_emb = pos_emb * self.scale
+        pos_emb = pos_emb.unsqueeze(0).expand_as(x)
+        
+        return nn.functional.normalize(pos_emb, dim=-1) if self.l2norm_embed else pos_emb
+
 class FixedPositionalEmbedding(nn.Module):
     def __init__(self, dim):
         super().__init__()
@@ -800,7 +821,7 @@ class AttentionLayers(nn.Module):
         causal = False,
         cross_attend = False,
         only_cross = False,
-        use_scalenorm = False,
+        use_scalenorm = True,
         use_rmsnorm = False,
         alibi_pos_bias = False,
         alibi_num_heads = None,
@@ -822,8 +843,8 @@ class AttentionLayers(nn.Module):
         cross_residual_attn = False,
         macaron = False,
         pre_norm = True,
-        gate_residual = False,
-        scale_residual = False,
+        gate_residual = True,
+        scale_residual = True,
         scale_residual_constant = 1.,
         deepnorm = False,
         shift_tokens = 0,
