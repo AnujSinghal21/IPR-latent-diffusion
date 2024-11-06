@@ -428,10 +428,10 @@ class Residual(nn.Module):
         return x + residual
 
 class GRUGating(nn.Module):
-    def __init__(self, dim, scale_residual = False):
+    def __init__(self, dim, scale_residual = False, scale_residual_constant = 1.):
         super().__init__()
         self.gru = nn.GRUCell(dim, dim)
-        self.residual_scale = nn.Parameter(torch.ones(dim)) if scale_residual else None
+        self.residual_scale = nn.Parameter(torch.full((dim, ), scale_residual_constant)) if scale_residual else None
 
     def forward(self, x, residual):
         if exists(self.residual_scale):
